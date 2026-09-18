@@ -27,7 +27,7 @@ app.use('/api', apiRouter);
 // Serve Frontend client build in production if available
 const clientDistPath = path.resolve(__dirname, '../../client/dist');
 const altClientDistPath = path.resolve(process.cwd(), '../client/dist');
-const localDistPath = path.resolve(process.cwd(), 'client_dist');
+const localDistPath = path.resolve(process.cwd(), 'client/dist');
 const resolvedDist = [clientDistPath, altClientDistPath, localDistPath].find(p => fs.existsSync(p));
 
 if (resolvedDist) {
