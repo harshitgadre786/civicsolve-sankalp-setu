@@ -1,6 +1,14 @@
 node_modules
+*/node_modules
 .git
 .gitignore
 *.log
+npm-debug.log*
 .env
+.env.*
 dist
+client/dist
+server/dist
+.vscode
+.idea
+*.tmp*
