@@ -155,7 +155,7 @@ export const IndustryPartners: React.FC = () => {
         </p>
       </div>
 
-      {/* Search & Sector Filters matching Screen 6 */}
+      {/* Search & Sector Filters */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2">
         <div className="relative w-80">
           <Search className="w-4 h-4 text-[#7A8581] absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -163,8 +163,8 @@ export const IndustryPartners: React.FC = () => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search companies..."
-            className="w-full pl-10 pr-4 py-2 text-xs bg-white border border-[#E7EBE8] rounded-lg focus:outline-none focus:border-[#16AF82]"
+            placeholder="Search corporate partners..."
+            className="w-full pl-10 pr-4 py-2 text-xs bg-white dark:bg-[#0c1a17] text-[#18201E] dark:text-[#E7EBE8] border border-[#E7EBE8] dark:border-[#1b2b27] rounded-lg focus:outline-none focus:border-[#16AF82]"
           />
         </div>
 
@@ -176,7 +176,7 @@ export const IndustryPartners: React.FC = () => {
               className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
                 selectedSector === sec
                   ? 'bg-[#16AF82] text-white shadow-sm'
-                  : 'bg-white text-[#7A8581] border border-[#E7EBE8] hover:border-[#16AF82]'
+                  : 'bg-white dark:bg-[#0c1a17] text-[#7A8581] dark:text-[#9AA5A2] border border-[#E7EBE8] dark:border-[#1b2b27] hover:border-[#16AF82]'
               }`}
             >
               {sec}
@@ -193,7 +193,7 @@ export const IndustryPartners: React.FC = () => {
           return (
             <div
               key={partner.id}
-              className="bg-white rounded-xl border border-[#E7EBE8] p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+              className="bg-white dark:bg-[#0c1a17] rounded-xl border border-[#E7EBE8] dark:border-[#1b2b27] p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-start justify-between">
@@ -201,27 +201,27 @@ export const IndustryPartners: React.FC = () => {
                     <img
                       src={partner.logoUrl || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=100&q=80'}
                       alt={partner.name}
-                      className="w-11 h-11 rounded-lg object-cover border border-[#E7EBE8]"
+                      className="w-11 h-11 rounded-lg object-cover border border-[#E7EBE8] dark:border-[#1b2b27]"
                     />
                     <div>
-                      <h3 className="font-bold text-sm text-[#18201E]">{partner.name}</h3>
-                      <span className="text-[11px] text-[#7A8581]">{partner.sector}</span>
+                      <h3 className="font-bold text-sm text-[#18201E] dark:text-[#E7EBE8]">{partner.name}</h3>
+                      <span className="text-[11px] text-[#7A8581] dark:text-[#9AA5A2]">{partner.sector}</span>
                     </div>
                   </div>
                 </div>
 
-                <p className="text-xs text-[#7A8581] mt-3 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-[#7A8581] dark:text-[#9AA5A2] mt-3 line-clamp-2 leading-relaxed">
                   {partner.description}
                 </p>
 
                 {/* Engagements list */}
-                <div className="mt-4 pt-3 border-t border-[#E7EBE8] text-xs">
-                  <span className="text-[11px] font-semibold text-[#7A8581] block mb-1.5">Focus Areas:</span>
+                <div className="mt-4 pt-3 border-t border-[#E7EBE8] dark:border-[#1b2b27] text-xs">
+                  <span className="text-[11px] font-semibold text-[#7A8581] dark:text-[#9AA5A2] block mb-1.5">Focus Areas:</span>
                   <div className="flex flex-wrap gap-1.5">
                     {engs.map((en, idx) => (
                       <span
                         key={idx}
-                        className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#F5F6F4] text-[#18201E] border border-[#E7EBE8]"
+                        className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#F5F6F4] dark:bg-[#162421] text-[#18201E] dark:text-[#E7EBE8] border border-[#E7EBE8] dark:border-[#1b2b27]"
                       >
                         {en}
                       </span>
@@ -231,13 +231,13 @@ export const IndustryPartners: React.FC = () => {
               </div>
 
               {/* Card Footer */}
-              <div className="pt-4 mt-4 border-t border-[#E7EBE8] flex items-center justify-between text-xs">
+              <div className="pt-4 mt-4 border-t border-[#E7EBE8] dark:border-[#1b2b27] flex items-center justify-between text-xs">
                 <span className="font-semibold text-[#16AF82]">
                   Active Projects: {partner.activeProjectsCount || 8}
                 </span>
                 <button
                   onClick={() => setSelectedPartnerForEngage(partner)}
-                  className="px-3 py-1 bg-[#DDF2E7] text-[#16AF82] hover:bg-[#16AF82] hover:text-white rounded-md font-semibold transition-colors"
+                  className="px-3 py-1 bg-[#DDF2E7] dark:bg-[#16AF82]/20 text-[#16AF82] hover:bg-[#16AF82] hover:text-white rounded-md font-semibold transition-colors"
                 >
                   Engage
                 </button>
@@ -250,13 +250,13 @@ export const IndustryPartners: React.FC = () => {
       {/* Engage Modal */}
       {selectedPartnerForEngage && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#E7EBE8] animate-fadeIn">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E7EBE8]">
+          <div className="bg-white dark:bg-[#0c1a17] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#E7EBE8] dark:border-[#1b2b27] animate-fadeIn">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E7EBE8] dark:border-[#1b2b27]">
               <div className="flex items-center space-x-2">
                 <Handshake className="w-5 h-5 text-[#16AF82]" />
-                <h2 className="text-base font-bold text-[#18201E]">Engage with {selectedPartnerForEngage.name}</h2>
+                <h2 className="text-base font-bold text-[#18201E] dark:text-[#E7EBE8]">Engage with {selectedPartnerForEngage.name}</h2>
               </div>
-              <button onClick={() => setSelectedPartnerForEngage(null)} className="text-[#7A8581] hover:text-[#18201E]">
+              <button onClick={() => setSelectedPartnerForEngage(null)} className="text-[#7A8581] hover:text-[#18201E] dark:hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -269,11 +269,11 @@ export const IndustryPartners: React.FC = () => {
             ) : (
               <form onSubmit={handleSendEngagement} className="mt-4 space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-[#18201E] mb-1">Engagement Type</label>
+                  <label className="block text-xs font-semibold text-[#18201E] dark:text-[#E7EBE8] mb-1">Engagement Type</label>
                   <select
                     value={engagementType}
                     onChange={(e) => setEngagementType(e.target.value)}
-                    className="w-full px-3 py-2 text-xs bg-[#F5F6F4] border border-[#E7EBE8] rounded-lg focus:outline-none"
+                    className="w-full px-3 py-2 text-xs bg-[#F5F6F4] dark:bg-[#152723] border border-[#E7EBE8] dark:border-[#1F332E] text-[#18201E] dark:text-[#E7EBE8] rounded-lg focus:outline-none"
                   >
                     <option value="Mentorship">Technical Mentorship</option>
                     <option value="Funding">CSR Seed Grant / Funding</option>
@@ -284,21 +284,21 @@ export const IndustryPartners: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#18201E] mb-1">Proposal Brief</label>
+                  <label className="block text-xs font-semibold text-[#18201E] dark:text-[#E7EBE8] mb-1">Proposal Brief</label>
                   <textarea
                     rows={3}
                     value={engagementDetails}
                     onChange={(e) => setEngagementDetails(e.target.value)}
                     placeholder="Describe how this corporate partnership will help scale the prototype in target villages..."
-                    className="w-full px-3 py-2 text-xs bg-[#F5F6F4] border border-[#E7EBE8] rounded-lg focus:outline-none focus:border-[#16AF82]"
+                    className="w-full px-3 py-2 text-xs bg-[#F5F6F4] dark:bg-[#152723] border border-[#E7EBE8] dark:border-[#1F332E] text-[#18201E] dark:text-[#E7EBE8] rounded-lg focus:outline-none focus:border-[#16AF82]"
                   />
                 </div>
 
-                <div className="pt-3 border-t border-[#E7EBE8] flex justify-end space-x-3">
+                <div className="pt-3 border-t border-[#E7EBE8] dark:border-[#1F332E] flex justify-end space-x-3">
                   <button
                     type="button"
                     onClick={() => setSelectedPartnerForEngage(null)}
-                    className="px-4 py-2 text-xs font-semibold text-[#7A8581] hover:bg-[#F5F6F4] rounded-lg"
+                    className="px-4 py-2 text-xs font-semibold text-[#7A8581] dark:text-[#8E9C97] hover:bg-[#F5F6F4] dark:hover:bg-[#152723] rounded-lg"
                   >
                     Cancel
                   </button>

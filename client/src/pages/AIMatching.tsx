@@ -116,6 +116,7 @@ export const AIMatching: React.FC<AIMatchingProps> = ({ initialStatement = '' })
   });
 
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
+  const [notificationMsg, setNotificationMsg] = useState<string | null>(null);
 
   const handleAnalyze = async () => {
     if (!statement.trim()) return;
@@ -134,8 +135,9 @@ export const AIMatching: React.FC<AIMatchingProps> = ({ initialStatement = '' })
   };
 
   const handleConnect = (id: string, name: string) => {
-    setConnectedIds([...connectedIds, id]);
-    alert(`Collaborative proposal dispatched to ${name}!`);
+    setConnectedIds(prev => [...prev, id]);
+    setNotificationMsg(`Collaborative proposal dispatched to ${name}!`);
+    setTimeout(() => setNotificationMsg(null), 3500);
   };
 
   const sampleStatements = [
@@ -160,6 +162,13 @@ export const AIMatching: React.FC<AIMatchingProps> = ({ initialStatement = '' })
           Find the best universities, corporate CSR partners, and student teams for any societal challenge.
         </p>
       </div>
+
+      {notificationMsg && (
+        <div className="p-3 bg-[#DDF2E7] border border-[#16AF82]/30 text-[#16AF82] text-xs font-semibold rounded-xl flex items-center space-x-2 animate-fadeIn shadow-sm">
+          <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+          <span>{notificationMsg}</span>
+        </div>
+      )}
 
       {/* Input Problem Statement Card matching Mockup Screen 8 */}
       <div className="bg-white rounded-2xl border border-[#E7EBE8] p-6 shadow-sm space-y-4">

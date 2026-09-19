@@ -10,9 +10,11 @@ datasource db {
 model User {
   id           String      @id @default(uuid())
   email        String      @unique
-  password     String
+  password     String?
+  googleId     String?     @unique
+  firebaseUid  String?     @unique
   name         String
-  role         String      @default("CITIZEN") // CITIZEN, UNIVERSITY_ADMIN, INDUSTRY_PARTNER, GOVERNMENT
+  role         String      @default("CITIZEN") // CITIZEN, STUDENT, UNIVERSITY_ADMIN, INDUSTRY_PARTNER, GOVERNMENT, ADMIN
   organization String?
   phone        String?
   location     String?     @default("Ranchi, Jharkhand")
@@ -32,13 +34,16 @@ model Challenge {
   id              String      @id @default(uuid())
   title           String
   description     String
-  category        String      // Environment, Healthcare, Education, Agriculture, Infrastructure, Water & Sanitation, Rural Livelihoods
+  category        String      // Roads, Electricity, Water, Garbage, Safety, Environment, Infrastructure, Healthcare, Education, Other
+  severity        String      @default("HIGH")   // LOW, MEDIUM, HIGH, CRITICAL
   location        String      // e.g. "Ranchi, Jharkhand"
   district        String      // Ranchi, Dhanbad, Bokaro, Hazaribagh, etc.
   lat             Float?      @default(23.3441)
   lng             Float?      @default(85.3096)
   priority        String      @default("MEDIUM") // HIGH, MEDIUM, LOW
-  status          String      @default("OPEN")   // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  status          String      @default("SUBMITTED") // SUBMITTED, UNDER_REVIEW, VERIFIED, ASSIGNED, IN_PROGRESS, RESOLVED, REJECTED, OPEN, CLOSED
+  assignedDepartment String? @default("Municipal Corporation")
+  contactInfo     String?
   mediaUrls       String?     @default("[]")     // JSON string of URLs
   requiredSkills  String?     @default("[]")     // JSON array of skill tags
   daysLeft        Int         @default(30)
@@ -55,6 +60,19 @@ model Challenge {
   solutions       Solution[]
   comments        Comment[]
   aiClassification AiClassification?
+  timeline        ChallengeTimeline[]
+}
+
+model ChallengeTimeline {
+  id          String    @id @default(uuid())
+  challengeId String
+  stage       String    // REPORTED, VERIFIED, ASSIGNED, IN_PROGRESS, RESOLVED, REJECTED
+  title       String
+  description String?
+  actorName   String?
+  timestamp   DateTime  @default(now())
+
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
 }
 
 model ChallengeSupporter {

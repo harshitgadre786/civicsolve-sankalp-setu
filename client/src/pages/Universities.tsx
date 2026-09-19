@@ -6,7 +6,11 @@ import {
   Layers, 
   ExternalLink, 
   ArrowRight,
-  BookOpen
+  BookOpen,
+  X,
+  CheckCircle2,
+  Building,
+  ShieldCheck
 } from 'lucide-react';
 import type { University } from '../types';
 import { api } from '../api/client';
@@ -15,6 +19,8 @@ export const Universities: React.FC = () => {
   const [universities, setUniversities] = useState<University[]>([]);
   const [selectedDept, setSelectedDept] = useState('All');
   const [search, setSearch] = useState('');
+  const [selectedUniForModal, setSelectedUniForModal] = useState<University | null>(null);
+  const [collabSent, setCollabSent] = useState(false);
 
   const departments = ['All', 'Engineering', 'Science', 'Management', 'Agriculture', 'Healthcare', 'Others'];
 
@@ -148,7 +154,7 @@ export const Universities: React.FC = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search universities..."
-            className="w-full pl-10 pr-4 py-2 text-xs bg-white border border-[#E7EBE8] rounded-lg focus:outline-none focus:border-[#16AF82]"
+            className="w-full pl-10 pr-4 py-2 text-xs bg-white dark:bg-[#0c1a17] text-[#18201E] dark:text-[#E7EBE8] border border-[#E7EBE8] dark:border-[#1b2b27] rounded-lg focus:outline-none focus:border-[#16AF82]"
           />
         </div>
 
@@ -160,7 +166,7 @@ export const Universities: React.FC = () => {
               className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
                 selectedDept === dept
                   ? 'bg-[#16AF82] text-white shadow-sm'
-                  : 'bg-white text-[#7A8581] border border-[#E7EBE8] hover:border-[#16AF82]'
+                  : 'bg-white dark:bg-[#0c1a17] text-[#7A8581] dark:text-[#9AA5A2] border border-[#E7EBE8] dark:border-[#1b2b27] hover:border-[#16AF82]'
               }`}
             >
               {dept}
@@ -177,7 +183,7 @@ export const Universities: React.FC = () => {
           return (
             <div
               key={uni.id}
-              className="bg-white rounded-xl border border-[#E7EBE8] p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+              className="bg-white dark:bg-[#0c1a17] rounded-xl border border-[#E7EBE8] dark:border-[#1b2b27] p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-start justify-between">
@@ -185,11 +191,11 @@ export const Universities: React.FC = () => {
                     <img
                       src={uni.logoUrl || 'https://images.unsplash.com/photo-1562774053-701939374585?w=100&q=80'}
                       alt={uni.name}
-                      className="w-11 h-11 rounded-lg object-cover border border-[#E7EBE8]"
+                      className="w-11 h-11 rounded-lg object-cover border border-[#E7EBE8] dark:border-[#1b2b27]"
                     />
                     <div>
-                      <h3 className="font-bold text-sm text-[#18201E] line-clamp-1">{uni.name}</h3>
-                      <div className="flex items-center space-x-1 text-xs text-[#7A8581] mt-0.5">
+                      <h3 className="font-bold text-sm text-[#18201E] dark:text-[#E7EBE8] line-clamp-1">{uni.name}</h3>
+                      <div className="flex items-center space-x-1 text-xs text-[#7A8581] dark:text-[#9AA5A2] mt-0.5">
                         <MapPin className="w-3 h-3 text-[#16AF82]" />
                         <span>{uni.location}</span>
                       </div>
@@ -197,13 +203,13 @@ export const Universities: React.FC = () => {
                   </div>
 
                   {uni.nirfRank && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#DDF2E7] text-[#16AF82] whitespace-nowrap">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#DDF2E7] dark:bg-[#16AF82]/20 text-[#16AF82] whitespace-nowrap">
                       {uni.nirfRank}
                     </span>
                   )}
                 </div>
 
-                <p className="text-xs text-[#7A8581] mt-3 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-[#7A8581] dark:text-[#9AA5A2] mt-3 line-clamp-2 leading-relaxed">
                   {uni.description}
                 </p>
 
@@ -212,7 +218,7 @@ export const Universities: React.FC = () => {
                   {tags.map((tag, idx) => (
                     <span
                       key={idx}
-                      className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#F5F6F4] text-[#18201E] border border-[#E7EBE8]"
+                      className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#F5F6F4] dark:bg-[#162421] text-[#18201E] dark:text-[#E7EBE8] border border-[#E7EBE8] dark:border-[#1b2b27]"
                     >
                       {tag}
                     </span>
@@ -221,19 +227,112 @@ export const Universities: React.FC = () => {
               </div>
 
               {/* Footer */}
-              <div className="pt-4 mt-4 border-t border-[#E7EBE8] flex items-center justify-between text-xs">
+              <div className="pt-4 mt-4 border-t border-[#E7EBE8] dark:border-[#1b2b27] flex items-center justify-between text-xs">
                 <span className="font-semibold text-[#16AF82]">
                   {uni.activeProjectsCount || 12} active projects
                 </span>
-                <span className="text-[#7A8581] hover:text-[#18201E] font-medium flex items-center space-x-1 cursor-pointer">
+                <button
+                  onClick={() => {
+                    setSelectedUniForModal(uni);
+                    setCollabSent(false);
+                  }}
+                  className="text-[#7A8581] dark:text-[#9AA5A2] hover:text-[#16AF82] dark:hover:text-[#16AF82] font-medium flex items-center space-x-1 cursor-pointer transition-colors"
+                >
                   <span>View Profile</span>
                   <ArrowRight className="w-3 h-3" />
-                </span>
+                </button>
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* University Profile Modal */}
+      {selectedUniForModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#0c1a17] rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#E7EBE8] dark:border-[#1b2b27] animate-fadeIn space-y-4 text-left">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E7EBE8] dark:border-[#1b2b27]">
+              <div className="flex items-center space-x-3">
+                <img
+                  src={selectedUniForModal.logoUrl || 'https://images.unsplash.com/photo-1562774053-701939374585?w=100&q=80'}
+                  alt={selectedUniForModal.name}
+                  className="w-12 h-12 rounded-xl object-cover border border-[#16AF82]"
+                />
+                <div>
+                  <h3 className="font-bold text-sm text-[#18201E] dark:text-[#E7EBE8]">{selectedUniForModal.name}</h3>
+                  <p className="text-xs text-[#7A8581] dark:text-[#9AA5A2]">{selectedUniForModal.location}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedUniForModal(null)}
+                className="text-[#7A8581] hover:text-[#18201E] dark:hover:text-white p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-[#7A8581] dark:text-[#9AA5A2] leading-relaxed">
+              {selectedUniForModal.description}
+            </p>
+
+            <div className="space-y-3">
+              <div>
+                <span className="text-[11px] font-bold text-[#18201E] dark:text-[#E7EBE8] uppercase tracking-wider block mb-1">
+                  Active Departments & Research Hubs:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {parseTags(selectedUniForModal.departments).map((dept, i) => (
+                    <span key={i} className="px-2 py-0.5 rounded text-[11px] bg-[#DDF2E7] dark:bg-[#16AF82]/20 text-[#16AF82] font-semibold">
+                      {dept}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[11px] font-bold text-[#18201E] dark:text-[#E7EBE8] uppercase tracking-wider block mb-1">
+                  Specialized Lab & Field Telemetry Capabilities:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {parseTags(selectedUniForModal.expertiseTags).map((tag, i) => (
+                    <span key={i} className="px-2 py-0.5 rounded text-[11px] bg-[#F5F6F4] dark:bg-[#162421] text-[#18201E] dark:text-[#E7EBE8] border border-[#E7EBE8] dark:border-[#1b2b27]">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {collabSent ? (
+              <div className="p-3 bg-[#DDF2E7] dark:bg-[#16AF82]/20 text-[#16AF82] text-xs font-semibold rounded-xl flex items-center space-x-2">
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                <span>Mentorship & incubation request dispatched to university administration!</span>
+              </div>
+            ) : (
+              <div className="pt-3 border-t border-[#E7EBE8] dark:border-[#1b2b27] flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedUniForModal(null)}
+                  className="px-4 py-2 text-xs font-semibold text-[#7A8581] hover:bg-[#F5F6F4] dark:hover:bg-[#162421] rounded-lg"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCollabSent(true);
+                    setTimeout(() => setSelectedUniForModal(null), 2500);
+                  }}
+                  className="px-4 py-2 text-xs font-semibold text-white bg-[#16AF82] hover:bg-[#13976f] rounded-lg shadow-sm flex items-center space-x-1.5"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Request Incubation Support</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

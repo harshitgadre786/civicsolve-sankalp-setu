@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { Sidebar } from './components/Sidebar';
 import { Topbar } from './components/Topbar';
 import { Dashboard } from './pages/Dashboard';
@@ -94,7 +95,7 @@ const MainApp: React.FC = () => {
 
   // View: Main Authenticated Portal
   return (
-    <div className="min-h-screen bg-[#F5F6F4] text-[#18201E] flex">
+    <div className="min-h-screen bg-[#F5F6F4] dark:bg-[#071412] text-[#18201E] dark:text-[#E7EBE8] flex transition-colors duration-200">
       {/* Fixed Left Sidebar matching mockup #071412 */}
       <Sidebar 
         activeTab={activeTab} 
@@ -108,6 +109,7 @@ const MainApp: React.FC = () => {
         <Topbar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          onNavigate={handleNavigate}
           onRefresh={() => {
             const current = activeTab;
             setActiveTab('temp');
@@ -189,9 +191,11 @@ const MainApp: React.FC = () => {
 
 export function App() {
   return (
-    <AuthProvider>
-      <MainApp />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

@@ -16,6 +16,7 @@ async function main() {
   await prisma.teamMember.deleteMany();
   await prisma.team.deleteMany();
   await prisma.aiClassification.deleteMany();
+  await prisma.challengeTimeline.deleteMany();
   await prisma.challengeSupporter.deleteMany();
   await prisma.challenge.deleteMany();
   await prisma.industryPartner.deleteMany();
@@ -25,6 +26,20 @@ async function main() {
   const passwordHash = await bcrypt.hash('password123', 10);
 
   // 1. Seed Users (Covering all 5 platform roles)
+  const primaryAdmin = await prisma.user.create({
+    data: {
+      email: 'harshitgadre786@gmail.com',
+      password: passwordHash,
+      name: 'Harshit Gadre',
+      role: 'STUDENT',
+      organization: 'BIT Sindri • Sankalp Setu Team Lead',
+      location: 'Ranchi, Jharkhand',
+      phone: '+91 98765 43210',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&q=80',
+      skills: JSON.stringify(['Full Stack Engineering', 'AI/ML Systems', 'GIS Mapping', 'Smart Governance', 'Civic Action'])
+    }
+  });
+
   const student = await prisma.user.create({
     data: {
       email: 'harshitgadre706@gmail.com',
@@ -427,17 +442,260 @@ async function main() {
         detectedSkills: JSON.stringify(['IoT', 'Data Analytics', 'Environmental Science', 'Embedded Systems']),
         reasoning: 'Low-cost optical dust sensor network paired with automated misting cannons.'
       }
+    },
+    {
+      title: 'Pothole near main road',
+      description: 'Multiple deep potholes on the Kanke Road intersection causing severe two-wheeler skidding and traffic slowdowns during evening peak hours.',
+      category: 'Roads',
+      severity: 'CRITICAL',
+      location: 'Kanke Road, Ranchi',
+      district: 'Ranchi',
+      lat: 23.3850,
+      lng: 85.3210,
+      priority: 'HIGH',
+      status: 'IN_PROGRESS',
+      assignedDepartment: 'Road Construction Department, GoJ',
+      contactInfo: 'Ward 12 Councilor Office',
+      daysLeft: 8,
+      supportersCount: 420,
+      viewsCount: 1650,
+      affectedPeople: 3500,
+      requiredSkills: JSON.stringify(['Civil Engineering', 'Material Science', 'Quality Audit']),
+      mediaUrls: JSON.stringify(['https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80']),
+      createdById: citizen.id,
+      aiClassification: {
+        detectedCategory: 'Roads',
+        confidence: 0.98,
+        detectedSkills: JSON.stringify(['Civil Engineering', 'Asphalt Formulation']),
+        reasoning: 'Urgent asphalt patching and subsurface drainage needed.'
+      }
+    },
+    {
+      title: 'Broken street light on Ring Road',
+      description: 'Continuous stretch of 14 LED street lights non-operational between Dhurwa and Tupudana overpass, causing complete darkness and security hazards.',
+      category: 'Electricity',
+      severity: 'HIGH',
+      location: 'Ring Road, Ranchi',
+      district: 'Ranchi',
+      lat: 23.3100,
+      lng: 85.3050,
+      priority: 'HIGH',
+      status: 'UNDER_REVIEW',
+      assignedDepartment: 'Jharkhand Bijli Vitran Nigam (JBVNL)',
+      contactInfo: 'dhruwa.substation@jbvnl.co.in',
+      daysLeft: 14,
+      supportersCount: 310,
+      viewsCount: 1200,
+      affectedPeople: 2100,
+      requiredSkills: JSON.stringify(['Electrical Engineering', 'Smart Lighting', 'IoT']),
+      mediaUrls: JSON.stringify(['https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80']),
+      createdById: citizen.id,
+      aiClassification: {
+        detectedCategory: 'Electricity',
+        confidence: 0.95,
+        detectedSkills: JSON.stringify(['Electrical Grid', 'Smart Lighting']),
+        reasoning: 'Phase transformer failure along street lighting feeder.'
+      }
+    },
+    {
+      title: 'Garbage accumulation near market ward 14',
+      description: 'Uncollected municipal solid waste overflowing from community secondary bin near Bistupur Market for 5 consecutive days attracting stray cattle.',
+      category: 'Garbage',
+      severity: 'HIGH',
+      location: 'Bistupur Market, Jamshedpur',
+      district: 'Jamshedpur',
+      lat: 22.7980,
+      lng: 86.1950,
+      priority: 'HIGH',
+      status: 'ASSIGNED',
+      assignedDepartment: 'Jamshedpur Notified Area Committee (JNAC)',
+      contactInfo: 'jnac.sanitation@gmail.com',
+      daysLeft: 5,
+      supportersCount: 540,
+      viewsCount: 1980,
+      affectedPeople: 6200,
+      requiredSkills: JSON.stringify(['Waste Management', 'Logistics', 'Public Health']),
+      mediaUrls: JSON.stringify(['https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=800&q=80']),
+      createdById: citizen.id,
+      aiClassification: {
+        detectedCategory: 'Garbage',
+        confidence: 0.99,
+        detectedSkills: JSON.stringify(['Solid Waste Management', 'Route Optimization']),
+        reasoning: 'Compactor vehicle dispatch required immediately.'
+      }
+    },
+    {
+      title: 'Water leakage from municipal mainline',
+      description: 'Underground potable water supply pipe burst leaking thousands of gallons per hour near Bank More roundabout, resulting in dry taps for 400 households.',
+      category: 'Water',
+      severity: 'CRITICAL',
+      location: 'Bank More, Dhanbad',
+      district: 'Dhanbad',
+      lat: 23.7910,
+      lng: 86.4270,
+      priority: 'HIGH',
+      status: 'VERIFIED',
+      assignedDepartment: 'Drinking Water & Sanitation Dept (DWSD)',
+      contactInfo: 'dhanbad.dwsd@jharkhand.gov.in',
+      daysLeft: 3,
+      supportersCount: 780,
+      viewsCount: 2800,
+      affectedPeople: 4500,
+      requiredSkills: JSON.stringify(['Hydraulics', 'Pipelining', 'Leak Telemetry']),
+      mediaUrls: JSON.stringify(['https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&q=80']),
+      createdById: citizen.id,
+      aiClassification: {
+        detectedCategory: 'Water',
+        confidence: 0.97,
+        detectedSkills: JSON.stringify(['Hydraulic Engineering', 'Acoustic Leak Detection']),
+        reasoning: 'Major high-pressure feeder valve breakdown.'
+      }
+    },
+    {
+      title: 'Damaged footpath and uncovered utility pit',
+      description: 'Pedestrian concrete slabs broken and open 6-foot telecommunication trench left uncovered on City Centre avenue posing immediate hazard to pedestrians.',
+      category: 'Safety',
+      severity: 'MEDIUM',
+      location: 'City Centre, Bokaro Steel City',
+      district: 'Bokaro',
+      lat: 23.6710,
+      lng: 86.1540,
+      priority: 'MEDIUM',
+      status: 'RESOLVED',
+      assignedDepartment: 'Bokaro Urban Development Authority',
+      contactInfo: 'bokaro.civic@jharkhand.gov.in',
+      daysLeft: 0,
+      supportersCount: 230,
+      viewsCount: 950,
+      affectedPeople: 1200,
+      requiredSkills: JSON.stringify(['Civil Infrastructure', 'Urban Safety']),
+      mediaUrls: JSON.stringify(['https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80']),
+      createdById: citizen.id,
+      aiClassification: {
+        detectedCategory: 'Safety',
+        confidence: 0.94,
+        detectedSkills: JSON.stringify(['Pedestrian Safety', 'Urban Infrastructure']),
+        reasoning: 'Permanent concrete trench cover replacement completed.'
+      }
+    },
+    {
+      title: 'Open drainage overflow near primary school',
+      description: 'Stormwater canal clogged with silt and plastic debris overflowing onto the pedestrian approach to Government Middle School during rain spells.',
+      category: 'Safety',
+      severity: 'CRITICAL',
+      location: 'Matwari, Hazaribagh',
+      district: 'Hazaribagh',
+      lat: 23.9920,
+      lng: 85.3550,
+      priority: 'HIGH',
+      status: 'IN_PROGRESS',
+      assignedDepartment: 'Hazaribagh Municipal Corporation',
+      contactInfo: 'hmc.health@jharkhand.gov.in',
+      daysLeft: 10,
+      supportersCount: 490,
+      viewsCount: 1720,
+      affectedPeople: 3800,
+      requiredSkills: JSON.stringify(['Drainage Hydraulics', 'Civil Sanitation']),
+      mediaUrls: JSON.stringify(['https://images.unsplash.com/photo-1579208575657-c595a05383b7?w=800&q=80']),
+      createdById: citizen.id,
+      aiClassification: {
+        detectedCategory: 'Safety',
+        confidence: 0.96,
+        detectedSkills: JSON.stringify(['Stormwater Engineering', 'Excavation']),
+        reasoning: 'Desilting excavator and reinforced concrete culvert installation in progress.'
+      }
+    },
+    {
+      title: 'Road damage and culvert subsidence',
+      description: 'Pavement collapsed near the Satsang Ashram bypass road creating a dangerous 1.2-meter crater across one lane of vehicular traffic.',
+      category: 'Roads',
+      severity: 'HIGH',
+      location: 'Satsang Bypass, Deoghar',
+      district: 'Deoghar',
+      lat: 24.4780,
+      lng: 86.6920,
+      priority: 'HIGH',
+      status: 'REPORTED',
+      assignedDepartment: 'Deoghar Municipal Corporation',
+      contactInfo: 'deoghar.roads@jharkhand.gov.in',
+      daysLeft: 20,
+      supportersCount: 380,
+      viewsCount: 1410,
+      affectedPeople: 4900,
+      requiredSkills: JSON.stringify(['Geotechnical Engineering', 'Structural Repair']),
+      mediaUrls: JSON.stringify(['https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80']),
+      createdById: citizen.id,
+      aiClassification: {
+        detectedCategory: 'Roads',
+        confidence: 0.93,
+        detectedSkills: JSON.stringify(['Pavement Design', 'Culvert Shoring']),
+        reasoning: 'Geotechnical soil investigation scheduled.'
+      }
     }
   ];
 
   const createdChallenges = [];
   for (const c of challengesData) {
-    const { aiClassification, ...challengeData } = c;
+    const { aiClassification, ...challengeData } = c as any;
+
+    const timelineEvents = [
+      {
+        stage: 'REPORTED',
+        title: 'Problem Reported by Citizen',
+        description: 'Report filed with photo evidence and GPS verification.',
+        actorName: 'Manoj Soren (Citizen)',
+        timestamp: new Date(Date.now() - 14 * 86400000)
+      }
+    ];
+
+    if (['VERIFIED', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED'].includes(challengeData.status)) {
+      timelineEvents.push({
+        stage: 'VERIFIED',
+        title: 'Field Verification Completed',
+        description: 'Municipal engineering team confirmed issue severity on-site.',
+        actorName: 'Er. Sandeep Tigga (Ward Officer)',
+        timestamp: new Date(Date.now() - 10 * 86400000)
+      });
+    }
+
+    if (['ASSIGNED', 'IN_PROGRESS', 'RESOLVED'].includes(challengeData.status)) {
+      timelineEvents.push({
+        stage: 'ASSIGNED',
+        title: `Work Order Dispatched to ${challengeData.assignedDepartment || 'Public Works'}`,
+        description: 'Contractor deployed under Fast-Track Civic Maintenance Scheme.',
+        actorName: 'Municipal Commissioner Office',
+        timestamp: new Date(Date.now() - 7 * 86400000)
+      });
+    }
+
+    if (['IN_PROGRESS', 'RESOLVED'].includes(challengeData.status)) {
+      timelineEvents.push({
+        stage: 'IN_PROGRESS',
+        title: 'Repairs & Field Work Active',
+        description: 'Excavation, structural repair, and safety barricading active on site.',
+        actorName: 'Site Supervisor, PWD',
+        timestamp: new Date(Date.now() - 3 * 86400000)
+      });
+    }
+
+    if (challengeData.status === 'RESOLVED') {
+      timelineEvents.push({
+        stage: 'RESOLVED',
+        title: 'Issue Resolved & Quality Certified',
+        description: 'Final audit completed. Site restored and cleared for public use.',
+        actorName: 'Chief Municipal Engineer',
+        timestamp: new Date(Date.now() - 1 * 86400000)
+      });
+    }
+
     const ch = await prisma.challenge.create({
       data: {
         ...challengeData,
         aiClassification: {
           create: aiClassification
+        },
+        timeline: {
+          create: timelineEvents
         }
       }
     });

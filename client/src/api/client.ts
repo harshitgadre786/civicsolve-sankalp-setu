@@ -24,15 +24,26 @@ export const api = {
   // Auth
   login: (credentials: any) => apiClient.post('/auth/login', credentials),
   register: (userData: any) => apiClient.post('/auth/register', userData),
+  loginGoogle: (googleData: any) => apiClient.post('/auth/google', googleData),
+  socialLogin: (socialData: any) => apiClient.post('/auth/social', socialData),
+  verifyTurnstile: (token: string) => apiClient.post('/auth/verify-turnstile', { token }),
   getMe: () => apiClient.get('/auth/me'),
   updateProfile: (profileData: any) => apiClient.put('/auth/profile', profileData),
+  patchProfile: (profileData: any) => apiClient.patch('/users/me', profileData),
+  getMyReports: () => apiClient.get('/users/me/reports'),
 
   // Challenges
   getChallenges: (params?: any) => apiClient.get('/challenges', { params }),
   getChallengeById: (id: string) => apiClient.get(`/challenges/${id}`),
-  createChallenge: (formData: FormData) => apiClient.post('/challenges', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
+  createChallenge: (formData: FormData | any) => {
+    if (formData instanceof FormData) {
+      return apiClient.post('/challenges', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+    }
+    return apiClient.post('/challenges', formData);
+  },
+  updateChallenge: (id: string, data: any) => apiClient.patch(`/challenges/${id}`, data),
   supportChallenge: (id: string) => apiClient.post(`/challenges/${id}/support`),
 
   // Solutions

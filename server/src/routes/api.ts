@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { authenticateToken, optionalAuth } from '../middleware/auth';
 import { upload } from '../services/uploadService';
-import { register, login, getMe, updateProfile } from '../controllers/authController';
-import { getChallenges, getChallengeById, createChallenge, supportChallenge, getForYouChallenges } from '../controllers/challengeController';
+import { register, login, getMe, updateProfile, googleAuth, socialAuth, verifyTurnstile } from '../controllers/authController';
+import { getChallenges, getChallengeById, createChallenge, updateChallenge, supportChallenge, getForYouChallenges, getMyReports } from '../controllers/challengeController';
 import { getSolutions, getSolutionById, createSolution, getGovernmentQueue, reviewSolution } from '../controllers/solutionController';
 import { getUniversities, getUniversityById } from '../controllers/universityController';
 import { getIndustryPartners, getIndustryPartnerById, createEngagement } from '../controllers/industryController';
@@ -30,15 +30,34 @@ router.get('/stats/landing', getLandingStats);
 // Auth
 router.post('/auth/register', register);
 router.post('/auth/login', login);
+router.post('/auth/google', googleAuth);
+router.post('/auth/social', socialAuth);
+router.post('/auth/verify-turnstile', verifyTurnstile);
 router.get('/auth/me', authenticateToken, getMe);
 router.put('/auth/profile', authenticateToken, updateProfile);
 
-// Challenges
+// User Profile & Reports
+router.get('/users/me', authenticateToken, getMe);
+router.patch('/users/me', authenticateToken, updateProfile);
+router.get('/users/me/reports', optionalAuth, getMyReports);
+router.get('/users/me/problems', optionalAuth, getMyReports);
+
+// Challenges & Civic Problems
 router.get('/challenges/for-you', optionalAuth, getForYouChallenges);
 router.get('/challenges', getChallenges);
 router.get('/challenges/:id', optionalAuth, getChallengeById);
 router.post('/challenges', optionalAuth, upload.array('media', 5), createChallenge);
+router.patch('/challenges/:id', optionalAuth, updateChallenge);
 router.post('/challenges/:id/support', optionalAuth, supportChallenge);
+
+// Problem API Aliases (Step 13)
+router.get('/problems/map', getChallenges);
+router.get('/problems', getChallenges);
+router.get('/problems/:id', optionalAuth, getChallengeById);
+router.post('/problems', optionalAuth, upload.array('media', 5), createChallenge);
+router.patch('/problems/:id', optionalAuth, updateChallenge);
+router.post('/problems/:id/upvote', optionalAuth, supportChallenge);
+router.post('/problems/:id/comments', optionalAuth, createComment);
 
 // Solutions
 router.get('/solutions/government-queue', optionalAuth, getGovernmentQueue);

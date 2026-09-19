@@ -33,7 +33,11 @@ export interface Challenge {
   lat?: number;
   lng?: number;
   priority: 'HIGH' | 'MEDIUM' | 'LOW';
-  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  severity?: 'CRITICAL' | 'HIGH' | 'MEDIUM' | string;
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED' | string;
+  assignedDepartment?: string;
+  contactInfo?: string;
+  timeline?: any[];
   mediaUrls?: string;
   daysLeft: number;
   supportersCount: number;

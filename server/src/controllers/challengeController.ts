@@ -5,7 +5,7 @@ import { AIService } from '../services/aiService';
 
 export const getChallenges = async (req: Request, res: Response) => {
   try {
-    const { category, district, priority, status, sort, search } = req.query;
+    const { category, district, priority, severity, status, sort, search, createdById } = req.query;
 
     const where: any = {};
 
@@ -18,15 +18,23 @@ export const getChallenges = async (req: Request, res: Response) => {
     if (priority && priority !== 'All') {
       where.priority = String(priority).toUpperCase();
     }
+    if (severity && severity !== 'All') {
+      where.severity = String(severity).toUpperCase();
+    }
     if (status && status !== 'All') {
       where.status = String(status).toUpperCase();
+    }
+    if (createdById) {
+      where.createdById = String(createdById);
     }
     if (search) {
       const s = String(search).toLowerCase();
       where.OR = [
         { title: { contains: s } },
         { description: { contains: s } },
-        { location: { contains: s } }
+        { location: { contains: s } },
+        { id: { contains: s } },
+        { category: { contains: s } }
       ];
     }
 
@@ -47,6 +55,9 @@ export const getChallenges = async (req: Request, res: Response) => {
           select: { id: true, name: true, role: true, avatar: true }
         },
         aiClassification: true,
+        timeline: {
+          orderBy: { timestamp: 'asc' }
+        },
         solutions: {
           include: {
             progressEvents: { orderBy: { timestamp: 'asc' } }
@@ -93,6 +104,9 @@ export const getChallengeById = async (req: AuthRequest, res: Response) => {
             }
           }
         },
+        timeline: {
+          orderBy: { timestamp: 'asc' }
+        },
         comments: {
           orderBy: { createdAt: 'desc' }
         },
@@ -130,17 +144,26 @@ export const createChallenge = async (req: AuthRequest, res: Response) => {
       title,
       description,
       category: explicitCategory,
+      severity: explicitSeverity,
       location,
       district = 'Ranchi',
       lat,
       lng,
+      latitude,
+      longitude,
       priority = 'HIGH',
-      daysLeft = 30
+      daysLeft = 30,
+      assignedDepartment,
+      contactInfo
     } = req.body;
 
     if (!title || !description) {
       return res.status(400).json({ error: 'Title and description are required' });
     }
+
+    const finalLat = lat !== undefined && lat !== '' ? parseFloat(lat) : (latitude !== undefined && latitude !== '' ? parseFloat(latitude) : 23.3441);
+    const finalLng = lng !== undefined && lng !== '' ? parseFloat(lng) : (longitude !== undefined && longitude !== '' ? parseFloat(longitude) : 85.3096);
+    const severity = (explicitSeverity || priority || 'HIGH').toUpperCase();
 
     // Get fallback user if not authenticated
     let userId = req.user?.id;
@@ -181,7 +204,7 @@ export const createChallenge = async (req: AuthRequest, res: Response) => {
 
     const category = explicitCategory && explicitCategory !== 'Auto-detect' 
       ? explicitCategory 
-      : aiResult.category;
+      : (aiResult.category || 'Roads');
 
     // Process uploaded media files if any
     const mediaUrls: string[] = [];
@@ -194,15 +217,18 @@ export const createChallenge = async (req: AuthRequest, res: Response) => {
     // Default image if none uploaded
     if (mediaUrls.length === 0) {
       const defaultImages: Record<string, string> = {
+        'Roads': 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80',
+        'Electricity': 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80',
+        'Water': 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&q=80',
+        'Garbage': 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=800&q=80',
+        'Safety': 'https://images.unsplash.com/photo-1579208575657-c595a05383b7?w=800&q=80',
         'Environment': 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&q=80',
         'Healthcare': 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=800&q=80',
         'Education': 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&q=80',
         'Agriculture': 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800&q=80',
-        'Infrastructure': 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80',
-        'Water & Sanitation': 'https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=800&q=80',
-        'Rural Livelihoods': 'https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=800&q=80'
+        'Infrastructure': 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80'
       };
-      mediaUrls.push(defaultImages[category] || 'https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=800&q=80');
+      mediaUrls.push(defaultImages[category] || 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80');
     }
 
     // Create challenge and AI Classification in database
@@ -211,31 +237,46 @@ export const createChallenge = async (req: AuthRequest, res: Response) => {
         title,
         description,
         category,
+        severity,
         location: location || `${district}, Jharkhand`,
         district,
-        lat: lat ? parseFloat(lat) : 23.3441,
-        lng: lng ? parseFloat(lng) : 85.3096,
+        lat: finalLat,
+        lng: finalLng,
         priority: priority.toUpperCase(),
+        status: 'SUBMITTED',
+        assignedDepartment: assignedDepartment || 'Municipal Urban Development',
+        contactInfo: contactInfo || null,
         daysLeft: parseInt(daysLeft, 10) || 30,
         supportersCount: 1,
         viewsCount: 1,
         affectedPeople: Math.floor(Math.random() * 5000) + 800,
         mediaUrls: JSON.stringify(mediaUrls),
-        requiredSkills: JSON.stringify(aiResult.skills),
+        requiredSkills: JSON.stringify(aiResult.skills || ['Civil Engineering', 'Civic Action']),
         createdById: userId,
         aiClassification: {
           create: {
             detectedCategory: aiResult.category,
             confidence: aiResult.confidence,
-            detectedSkills: JSON.stringify(aiResult.skills),
+            detectedSkills: JSON.stringify(aiResult.skills || ['Civic Action']),
             duplicateOfId: aiResult.duplicateOfId,
             reasoning: aiResult.reasoning
           }
+        },
+        timeline: {
+          create: [
+            {
+              stage: 'REPORTED',
+              title: 'Problem Reported by Citizen',
+              description: 'Civic issue successfully recorded into municipal registry with geolocation.',
+              actorName: req.user?.name || 'Verified Citizen'
+            }
+          ]
         }
       },
       include: {
         aiClassification: true,
-        createdBy: true
+        createdBy: true,
+        timeline: true
       }
     });
 
@@ -243,8 +284,8 @@ export const createChallenge = async (req: AuthRequest, res: Response) => {
     await prisma.notification.create({
       data: {
         userId,
-        title: 'Challenge Posted Successfully',
-        message: `Your challenge "${title}" has been AI classified into "${category}" and routed to universities.`,
+        title: 'Civic Problem Logged Successfully',
+        message: `Your report "${title}" has been registered in the municipal database with severity ${severity}.`,
         type: 'CHALLENGE',
         link: `/challenges/${newChallenge.id}`
       }
@@ -254,6 +295,105 @@ export const createChallenge = async (req: AuthRequest, res: Response) => {
   } catch (error: any) {
     console.error('Create challenge error:', error);
     return res.status(500).json({ error: 'Failed to create challenge', details: error.message });
+  }
+};
+
+export const updateChallenge = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status, severity, assignedDepartment, timelineNote, priority } = req.body;
+
+    const existing = await prisma.challenge.findUnique({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({ error: 'Problem not found' });
+    }
+
+    const updated = await prisma.challenge.update({
+      where: { id },
+      data: {
+        ...(status && { status: status.toUpperCase() }),
+        ...(severity && { severity: severity.toUpperCase() }),
+        ...(priority && { priority: priority.toUpperCase() }),
+        ...(assignedDepartment && { assignedDepartment })
+      }
+    });
+
+    if (status || timelineNote) {
+      await prisma.challengeTimeline.create({
+        data: {
+          challengeId: id,
+          stage: (status || existing.status).toUpperCase(),
+          title: `Status Updated to ${(status || existing.status).replace('_', ' ')}`,
+          description: timelineNote || `Official status updated by ${req.user?.name || 'Authority'}`,
+          actorName: req.user?.name || 'Department Officer'
+        }
+      });
+    }
+
+    const fullChallenge = await prisma.challenge.findUnique({
+      where: { id },
+      include: {
+        timeline: { orderBy: { timestamp: 'asc' } },
+        createdBy: { select: { id: true, name: true, role: true, avatar: true } },
+        comments: { orderBy: { createdAt: 'desc' } }
+      }
+    });
+
+    return res.json(fullChallenge);
+  } catch (error: any) {
+    console.error('Update challenge error:', error);
+    return res.status(500).json({ error: 'Failed to update problem', details: error.message });
+  }
+};
+
+export const getMyReports = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id || (await prisma.user.findFirst({ where: { role: 'CITIZEN' } }))?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const reports = await prisma.challenge.findMany({
+      where: { createdById: userId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        timeline: { orderBy: { timestamp: 'asc' } },
+        _count: { select: { supporters: true, comments: true } }
+      }
+    });
+
+    const totalReports = reports.length;
+    const activeReports = reports.filter(r => ['SUBMITTED', 'REPORTED', 'UNDER_REVIEW', 'VERIFIED', 'ASSIGNED', 'IN_PROGRESS', 'OPEN'].includes(r.status)).length;
+    const resolvedReports = reports.filter(r => r.status === 'RESOLVED').length;
+    const communitySupport = reports.reduce((acc, r) => acc + (r.supportersCount || 0), 0);
+
+    const recentActivity = reports.flatMap(r => 
+      (r.timeline || []).map(t => ({
+        id: t.id,
+        challengeId: r.id,
+        challengeTitle: r.title,
+        type: 'STATUS_CHANGE',
+        stage: t.stage,
+        title: t.title,
+        description: t.description,
+        timestamp: t.timestamp
+      }))
+    ).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 10);
+
+    return res.json({
+      reports,
+      statistics: {
+        totalReports,
+        activeReports,
+        resolvedReports,
+        communitySupport
+      },
+      recentActivity
+    });
+  } catch (error: any) {
+    console.error('Get my reports error:', error);
+    return res.status(500).json({ error: 'Failed to fetch user reports' });
   }
 };
 
