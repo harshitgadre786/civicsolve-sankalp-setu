@@ -10,6 +10,10 @@ WORKDIR /app
 # Prisma requires OpenSSL
 RUN apk add --no-cache openssl
 
+ENV NODE_ENV=production
+ENV DATABASE_URL="file:./dev.db"
+ENV JWT_SECRET="sankalp-setu-civicsolve-super-secret-key-2026"
+
 # -------------------------
 # Build Frontend
 # -------------------------
@@ -28,7 +32,7 @@ COPY server/prisma ./server/prisma
 RUN cd server && npm ci && npx prisma generate
 
 COPY server ./server
-RUN cd server && npx prisma db push --skip-generate --accept-data-loss && npm run build
+RUN cd server && npx prisma db push --skip-generate --accept-data-loss && npx tsx prisma/seed.ts && npm run build
 
 
 # =========================
@@ -39,9 +43,9 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-
-# Render provides PORT
 ENV PORT=5000
+ENV DATABASE_URL="file:./dev.db"
+ENV JWT_SECRET="sankalp-setu-civicsolve-super-secret-key-2026"
 
 # Prisma requires OpenSSL
 RUN apk add --no-cache openssl
