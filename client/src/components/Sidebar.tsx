@@ -104,7 +104,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onNav
           </button>
         )}
         <button
-          onClick={logout}
+          onClick={() => {
+            logout();
+            if (onNavigateToLanding) onNavigateToLanding();
+          }}
           className="w-full flex items-center space-x-3 px-3.5 py-2 rounded-lg text-sm text-[#7A8581] hover:text-red-400 hover:bg-[#121c1a] transition-colors"
         >
           <LogOut className="w-4 h-4" />

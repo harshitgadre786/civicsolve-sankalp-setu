@@ -21,7 +21,7 @@ import { GovernmentPanel } from './pages/GovernmentPanel';
 import type { UserRole } from './types';
 
 const MainApp: React.FC = () => {
-  const { user, activeRole } = useAuth();
+  const { user, activeRole, login } = useAuth();
   const [viewMode, setViewMode] = useState<'landing' | 'auth' | 'app'>('app');
   const [authInitialMode, setAuthInitialMode] = useState<'login' | 'signup'>('login');
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -29,14 +29,11 @@ const MainApp: React.FC = () => {
   const [matchingSeedStatement, setMatchingSeedStatement] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // If user logs out, go to landing page
-  useEffect(() => {
-    if (!user && viewMode === 'app') {
-      setViewMode('landing');
-    }
-  }, [user, viewMode]);
-
   const handleNavigate = (tab: string, itemId?: string) => {
+    if (tab === 'landing') {
+      setViewMode('landing');
+      return;
+    }
     if (tab === 'challenge-detail' && itemId) {
       setSelectedChallengeId(itemId);
       setActiveTab('challenge-detail');
@@ -66,6 +63,20 @@ const MainApp: React.FC = () => {
     }
   };
 
+  const handleExploreChallenges = async (challengeId?: string) => {
+    if (!user) {
+      // Auto-assign citizen demo session so visitor has full privileges (voting, camera, posting, inspecting)
+      await login('citizen.jharkhand@gov.in');
+    }
+    setViewMode('app');
+    if (challengeId) {
+      setSelectedChallengeId(challengeId);
+      setActiveTab('challenge-detail');
+    } else {
+      setActiveTab('challenges');
+    }
+  };
+
   // View: Public Landing Page
   if (viewMode === 'landing') {
     return (
@@ -74,10 +85,7 @@ const MainApp: React.FC = () => {
           setAuthInitialMode(mode || 'login');
           setViewMode('auth');
         }}
-        onExploreChallenges={() => {
-          setViewMode('app');
-          setActiveTab('challenges');
-        }}
+        onExploreChallenges={handleExploreChallenges}
       />
     );
   }

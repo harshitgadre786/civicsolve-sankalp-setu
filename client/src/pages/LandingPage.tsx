@@ -19,7 +19,7 @@ import { api } from '../api/client';
 
 interface LandingPageProps {
   onGoToAuth: (mode?: 'login' | 'signup') => void;
-  onExploreChallenges: () => void;
+  onExploreChallenges: (challengeId?: string) => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onGoToAuth, onExploreChallenges }) => {
@@ -62,6 +62,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToAuth, onExploreC
         </div>
 
         <nav className="hidden md:flex items-center space-x-8 text-xs font-semibold text-[#7A8581]">
+          <button 
+            onClick={() => onExploreChallenges()}
+            className="text-[#18201E] hover:text-[#16AF82] transition-colors font-bold flex items-center space-x-1"
+          >
+            <span>Explore Challenges</span>
+          </button>
           <a href="#how-it-works" className="hover:text-[#16AF82] transition-colors">How It Works</a>
           <a href="#featured" className="hover:text-[#16AF82] transition-colors">Featured Challenges</a>
           <a href="#impact" className="hover:text-[#16AF82] transition-colors">Statewide Impact</a>
@@ -255,7 +261,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToAuth, onExploreC
           ]).map((ch: any) => (
             <div
               key={ch.id}
-              onClick={onExploreChallenges}
+              onClick={() => onExploreChallenges(ch.id)}
               className="bg-white rounded-2xl border border-[#E7EBE8] overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between text-left"
             >
               <div className="h-44 w-full relative bg-gray-100">
