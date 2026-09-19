@@ -28,7 +28,7 @@ COPY server/prisma ./server/prisma
 RUN cd server && npm ci && npx prisma generate
 
 COPY server ./server
-RUN cd server && npm run build
+RUN cd server && npx prisma db push --skip-generate --accept-data-loss && npm run build
 
 
 # =========================
@@ -55,15 +55,12 @@ COPY server/prisma ./server/prisma
 RUN cd server && npm ci --omit=dev && npx prisma generate
 
 # -------------------------
-# Copy compiled applications
+# Copy compiled applications and database
 # -------------------------
+COPY --from=builder /app/server/prisma ./server/prisma
 COPY --from=builder /app/server/dist ./server/dist
 COPY --from=builder /app/client/dist ./client/dist
-
-# -------------------------
-# Seed database
-# -------------------------
-RUN cd server && npx tsx prisma/seed.ts || true
+RUN mkdir -p /app/uploads /app/server/uploads
 
 EXPOSE 5000
 

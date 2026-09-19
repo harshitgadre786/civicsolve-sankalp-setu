@@ -25,10 +25,15 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use('/api', apiRouter);
 
 // Serve Frontend client build in production if available
-const clientDistPath = path.resolve(__dirname, '../../client/dist');
-const altClientDistPath = path.resolve(process.cwd(), '../client/dist');
-const localDistPath = path.resolve(process.cwd(), 'client/dist');
-const resolvedDist = [clientDistPath, altClientDistPath, localDistPath].find(p => fs.existsSync(p));
+const clientDistCandidates = [
+  path.resolve(__dirname, '../../../client/dist'),
+  path.resolve(__dirname, '../../client/dist'),
+  path.resolve(process.cwd(), '../client/dist'),
+  path.resolve(process.cwd(), 'client/dist'),
+  path.resolve(__dirname, '../public'),
+  path.resolve(process.cwd(), 'public')
+];
+const resolvedDist = clientDistCandidates.find(p => fs.existsSync(p));
 
 if (resolvedDist) {
   console.log(`📦 Serving static client build from: ${resolvedDist}`);
@@ -56,7 +61,25 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 CivicSolve API server listening on http://localhost:${PORT}`);
   console.log(`📡 Health endpoint: http://localhost:${PORT}/api/health`);
+
+  // Ensure database has seeded demonstration records on any fresh cloud deployment
+  try {
+    const prisma = (await import('./db')).default;
+    const userCount = await prisma.user.count();
+    if (userCount === 0) {
+      console.log('🌱 Fresh deployment detected (0 users). Auto-seeding CivicSolve dataset...');
+      const seedModule = await import('../prisma/seed');
+      if (typeof seedModule.main === 'function') {
+        await seedModule.main();
+        console.log('✅ Initial database seed applied successfully.');
+      }
+    } else {
+      console.log(`📊 Connected to database with ${userCount} registered users.`);
+    }
+  } catch (dbErr: any) {
+    console.warn('ℹ️ Startup database sync notice:', dbErr?.message || dbErr);
+  }
 });
